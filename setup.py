@@ -9,8 +9,8 @@ setup(name='modelseed_escher',
       license='MIT',
       packages=find_packages(),
       install_requires=[
-          "cobra >= 0.15.3"
-          "cobrakbase == 0.1.9"
-          "escher == 1.6.0"
+          "cobra >= 0.15.3",
+          "cobrakbase == 0.1.9",
+          "escher == 1.6.0",
       ],
       zip_safe=False)
