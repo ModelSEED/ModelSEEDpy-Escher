@@ -7,6 +7,7 @@ setup(name='modelseed_escher',
       author='Filipe Liu',
       author_email='fliu@anl.gov',
       license='MIT',
+      
       packages=find_packages(),
       install_requires=[
           "cobra >= 0.15.3",

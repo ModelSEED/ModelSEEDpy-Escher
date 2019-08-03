@@ -1,3 +1,49 @@
+def get_seed_ids(rxn):
+    seed_ids = set()
+    if '@' in rxn['id']:
+        rxn_id, database = rxn['id'].split('@')
+        seed_ids.add(rxn_id)
+        if 'obsolete_seeds' in rxn:
+            for rxn_id in rxn['obsolete_seeds']:
+                rxn_id, database = rxn_id.split('@')
+                seed_ids.add(rxn_id)
+    else:
+        if 'seed.reaction' in rxn['dblinks']:
+            for rxn_id in rxn['dblinks']['seed.reaction']:
+                seed_ids.add(rxn_id)
+        if 'seed.obsolete' in rxn['dblinks']:
+            for rxn_id in rxn['dblinks']['seed.obsolete']:
+                seed_ids.add(rxn_id)
+    if 'annotation' in rxn:
+        if 'seed.reaction' in rxn['annotation']:
+            seed_ids |= set(rxn['annotation']['seed.reaction'])
+    return seed_ids
+
+def get_cpd_seed_ids(model_metabolite):
+    seed_ids = set()
+    if '@' in model_metabolite['id']:
+        seed_id, database = model_metabolite['id'].split('@')
+        if database == 'SEED':
+            seed_ids.add(seed_id)
+            if 'obsolete_seeds' in model_metabolite:
+                for seed_id in model_metabolite['obsolete_seeds']:
+                    seed_id, database = seed_id.split('@')
+                    seed_ids.add(seed_id)
+    else:
+        if 'cluster' in model_metabolite:
+            for value in model_metabolite['cluster']:
+                if '@' in value:
+                    seed_id, database = value.split('@')
+                    if database == 'SEED':
+                        seed_ids.add(seed_id)
+                else:
+                    print('?', value)
+                    
+    if 'annotation' in model_metabolite:
+        if 'seed.compound' in model_metabolite['annotation']:
+            seed_ids |= set(model_metabolite['annotation']['seed.compound'])
+    return seed_ids
+
 class CobraJsonModel:
     
     def __init__(self, escher_model):
