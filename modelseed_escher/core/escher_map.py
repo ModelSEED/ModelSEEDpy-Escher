@@ -23,7 +23,102 @@ class EscherMap:
                 if m['bigg_id'] in cpd_remap:
                     m['bigg_id'] = cpd_remap[m['bigg_id']]
     
+    def add_uid_to_reaction_metabolites(self):
+        node_uid_map = {}
+        for node_uid in self.escher_graph['nodes']:
+            node = self.escher_graph['nodes'][node_uid]
+            if node['node_type'] == 'metabolite':
+                bigg_id = node['bigg_id']
+                if not bigg_id in node_uid_map:
+                    node_uid_map[bigg_id] = set()
+                node_uid_map[bigg_id].add(node_uid)
+
+        for node_uid in self.escher_graph['reactions']:
+            rnode = self.escher_graph['reactions'][node_uid]
+            met_id_to_uid = {}
+            for s_uid in rnode['segments']:
+                s = rnode['segments'][s_uid]
+                from_node_id = rnode['segments'][s_uid]['from_node_id']
+                to_node_id = rnode['segments'][s_uid]['to_node_id']
+                from_node = self.escher_graph['nodes'][from_node_id]
+                to_node = self.escher_graph['nodes'][to_node_id]
+                if from_node['node_type'] == 'metabolite':
+                    if not from_node['bigg_id'] in met_id_to_uid:
+                        met_id_to_uid[from_node['bigg_id']] = from_node_id
+                    else:
+                        print('!!!', from_node['bigg_id'])
+                if to_node['node_type'] == 'metabolite':
+                    if not to_node['bigg_id'] in met_id_to_uid:
+                        met_id_to_uid[to_node['bigg_id']] = to_node_id
+                    else:
+                        print('!!!', to_node['bigg_id'])
+
+            for m in rnode['metabolites']:
+                if m['bigg_id'] in met_id_to_uid:
+                    m['node_uid'] = met_id_to_uid[m['bigg_id']]
+
+            #print(met_id_to_uid)
+            #print(rnode)
+            #break
+
+        return node_uid_map
     
+    def delete_metabolites(self, cpd_ids):
+        delete_uids = set()
+        for map_uid in self.escher_graph['nodes']:
+            node = self.escher_graph['nodes'][map_uid]
+            if node['node_type'] == 'metabolite':
+                node_id = node['bigg_id']
+
+                if node_id in cpd_ids:
+                    delete_uids.add(map_uid)
+
+        for map_uid in delete_uids:
+            del self.escher_graph['nodes'][map_uid]
+            
+    def delete_reactions(self, rxn_ids, remove_compounds = False):
+        updated = {}
+        delete_markers = set()
+        delete_compounds = set()
+        tagged_compounds = set()
+        for map_uid in self.escher_graph['reactions']:
+            rnode = self.escher_graph['reactions'][map_uid]
+            if not rnode['bigg_id'] in rxn_ids:
+                updated[map_uid] = rnode
+            else:
+                for s_uid in rnode['segments']:
+                    s = rnode['segments'][s_uid]
+                    from_node_id = s['from_node_id']
+                    to_node_id = s['to_node_id']
+                    n_type = self.escher_graph['nodes'][from_node_id]['node_type']
+                    if n_type == 'metabolite':
+                        delete_compounds.add(from_node_id)
+                    else:
+                        delete_markers.add(from_node_id)
+                    #print(from_node_id, n_type)
+                    n_type = self.escher_graph['nodes'][to_node_id]['node_type']
+                    if n_type == 'metabolite':
+                        delete_compounds.add(to_node_id)
+                    else:
+                        delete_markers.add(to_node_id)
+                    #print(to_node_id, n_type)
+                    #print(s_uid, s)
+                #print(rnode)
+        #delete also midmarkers
+        for map_uid in delete_markers:
+            del self.escher_graph['nodes'][map_uid]
+        #delete oprhan compounds
+        if remove_compounds:
+            pass
+        self.escher_graph['reactions'] = updated
+    
+    @property
+    def nodes(self):
+        return self.escher_graph['nodes']
+    
+    #@property
+    #def reactions(self):
+    #    return self.escher_graph['reactions']
     
     @property
     def reactions(self):
