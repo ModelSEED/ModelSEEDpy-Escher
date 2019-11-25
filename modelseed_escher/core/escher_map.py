@@ -646,3 +646,7 @@ class EscherMap:
         with open(filename, 'r') as f:
             escher_map = EscherMap(json.loads(f.read()))
         return escher_map
+      
+    def clone(self):
+        data = copy.deepcopy(self.escher_map)
+        return EscherMap(data)
