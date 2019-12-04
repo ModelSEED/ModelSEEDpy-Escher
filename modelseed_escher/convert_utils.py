@@ -158,6 +158,26 @@ def add_compartment(em, node_uid_cmp):
             node = em.escher_graph['nodes'][node_uid]
             node['compartment'] = node_uid_cmp[node_uid]
             
+def move_to_compartment(cmp_id, em):
+    em.add_uid_to_reaction_metabolites()
+    node_uid_cmp = {}
+    node_uid_id = {}
+    for node_uid in em.escher_graph['nodes']:
+        
+        n = em.escher_graph['nodes'][node_uid]
+        if n['node_type'] == 'metabolite':
+            if not 'compartment' in n:
+                node_uid_cmp[node_uid] = cmp_id
+                n['bigg_id'] += '_' + cmp_id
+                node_uid_id[node_uid] = n['bigg_id']
+    add_compartment(em, node_uid_cmp)
+    for rxn_uid in em.escher_graph['reactions']:
+        rnode = em.escher_graph['reactions'][rxn_uid]
+        for o in rnode['metabolites']:
+            o['bigg_id'] = node_uid_id[o['node_uid']]
+            
+        rnode['bigg_id'] += '_' + cmp_id
+    return node_uid_cmp
 
 def get_cstoich_list(em, rnode):
     cstoich_list = []

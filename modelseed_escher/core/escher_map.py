@@ -10,6 +10,14 @@ class EscherMap:
         self.escher_graph = escher_map[1]
         self.escher_data = escher_map[0]
         
+    def get_next_id(self):
+        next_id = 0
+        for node_id in self.escher_graph['nodes']:
+            if int(node_id) >= next_id:
+                next_id = int(node_id) + 1
+
+        return next_id
+        
     def swap_ids(self, cpd_remap, rxn_remap):
         for map_uid in self.escher_graph['nodes']:
             node = self.escher_graph['nodes'][map_uid]
@@ -640,6 +648,37 @@ class EscherMap:
     def display_in_notebook(self):
         builder = escher.Builder(map_json=json.dumps(self.escher_map))
         return builder.display_in_notebook()
+    
+    def set_to_origin(self):
+        offset_x = self.escher_graph['canvas']['x']
+        offset_y = self.escher_graph['canvas']['y']
+        self.escher_graph['canvas']['x'] = 0
+        self.escher_graph['canvas']['y'] = 0
+
+        for uid in self.nodes:
+            n = self.nodes[uid]
+            n['x'] -= offset_x
+            n['y'] -= offset_y
+            if 'label_x' in n:
+                n['label_x'] -= offset_x
+            if 'label_y' in n:
+                n['label_y'] -= offset_y
+        for uid in self.escher_graph['reactions']:
+            rnode = self.escher_graph['reactions'][uid]
+            rnode['label_x'] -= offset_x
+            rnode['label_y'] -= offset_y
+            for s_uid in rnode['segments']:
+                segment = rnode['segments'][s_uid]
+                if 'b1' in segment and segment['b1']:
+                    segment['b1']['x'] -= offset_x
+                    segment['b1']['y'] -= offset_y
+                if 'b2' in segment and segment['b2']:
+                    segment['b2']['x'] -= offset_x
+                    segment['b2']['y'] -= offset_y
+        for uid in self.escher_graph['text_labels']:
+            tlabel = self.escher_graph['text_labels'][uid]
+            tlabel['x'] -= offset_x
+            tlabel['y'] -= offset_y
     
     def from_json(filename):
         escher_map = None

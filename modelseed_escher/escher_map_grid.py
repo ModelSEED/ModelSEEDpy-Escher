@@ -134,32 +134,55 @@ class EscherGrid:
             return {
                 'x' : segment['x'] + x_off, 
                 'y' : segment['y'] + y_off}
-        
+    
+    @staticmethod
+    def get_max_canvas(maps):
+        max_w = 0
+        max_h = 0
+        for e in maps:
+            w = e.escher_graph['canvas']['width']
+            h = e.escher_graph['canvas']['height']
+            if w > max_w:
+                max_w = w
+            if h > max_h:
+                max_h = h
+        return max_w, max_h
+    
     def build(self, maps, grid):
         master = maps[0].clone()
-        block_width = master.escher_graph['canvas']['width']
-        block_height = master.escher_graph['canvas']['height']
-        master.escher_graph['canvas']['width'] *= grid[0]
-        master.escher_graph['canvas']['height'] *= grid[1]
+        master.set_to_origin()
+        block_width, block_height = self.get_max_canvas(maps)
+        logger.debug('Max W: %f, H: %f', block_width, block_height)
+        master.escher_graph['canvas']['width'] = block_width * grid[0]
+        master.escher_graph['canvas']['height'] = block_height * grid[1]
+        master.escher_graph['canvas']['x'] = 0
+        master.escher_graph['canvas']['y'] = 0
+        #block_width = master.escher_graph['canvas']['width']
+        #block_height = master.escher_graph['canvas']['height']
+        #master.escher_graph['canvas']['width'] *= grid[0]
+        #master.escher_graph['canvas']['height'] *= grid[1]
         
         next_id = self.get_next_id(maps[0])
         
-        print(next_id)
+        logger.debug('next_id: %d', next_id)
+
         map_index = 1
         for i in range(0, grid[1]):
             for j in range(0, grid[0]):
                 logger.debug("[%d, %d]", i, j)
                 if not (i == 0 and j == 0) and map_index < len(maps):
                     if not maps[map_index] == None:
+                        to_draw = maps[map_index].clone()
+                        to_draw.set_to_origin()
                         logger.debug("[DRAW] %d next_id: %d", map_index, next_id)
 
-                        next_id, node_id_remap, compound_remap = self.copy_map_compounds(maps[map_index].escher_map,
+                        next_id, node_id_remap, compound_remap = self.copy_map_compounds(to_draw.escher_map,
                                            master.escher_map, 
                                            next_id, 
                                            lambda n : (n['bigg_id'], n['name']), 
                                            x_off = j * block_width, y_off = i * block_height)
 
-                        next_id = self.copy_map_reactions(maps[map_index].escher_map, 
+                        next_id = self.copy_map_reactions(to_draw.escher_map, 
                                                      master.escher_map, 
                                                      next_id, 
                                                      node_id_remap, compound_remap, 

@@ -1,3 +1,4 @@
+from modelseed_escher.core.escher_map import EscherMap
 import json
 
 class EscherManager():
@@ -32,7 +33,7 @@ class EscherManager():
         escher_map = None
         with open("{}/maps/{}/{}.{}.json".format(self.escher.get_cache_dir(), dataset, model_id, map_id), 'r') as fh:
             escher_map = json.loads(fh.read())
-        return escher_map
+        return EscherMap(escher_map)
     
     def save_map(self, dataset, model_id, map_id, escher_map):
         

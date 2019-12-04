@@ -1,4 +1,5 @@
 import modelseed_escher.core
+import modelseed_escher.map
 #import modelseed_escher.kbase
 #import modelseed_escher.modelseed
 from modelseed_escher.escher_manager import EscherManager
