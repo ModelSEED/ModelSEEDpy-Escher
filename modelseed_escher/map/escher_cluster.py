@@ -43,3 +43,31 @@ class EscherCluster:
     
     def cluster(self, escher_map):
         return self.compute_all_metabolite_clusters(escher_map.escher_graph)
+    
+    def cluster_ids(self, cluster_data, em):
+        g = nx.Graph()
+        for c in cluster_data:
+            if len(c) > 0:
+                p = em.nodes[list(c)[0]]['bigg_id']
+                for uid in c:
+                    id = em.nodes[uid]['bigg_id']
+                    #print(p, id)
+                    g.add_edge(p, id)
+        cc = list(nx.algorithms.connected_components(g))
+        return cc
+    
+    def ids_to_uid(self, cc, em):
+        ret = []
+        id_to_uid = {}
+        for uid in em.nodes:
+            n = em.nodes[uid]
+            if n['node_type'] == 'metabolite':
+                id_to_uid[n['bigg_id']] = uid
+
+        for o in cc:
+            c = set()
+            for id in o:
+                c.add(id_to_uid[id])
+            if len(c) > 0:
+                ret.append(c)
+        return ret
