@@ -24,14 +24,14 @@ class EscherCluster:
                     #print(node_id, dist, other_node['bigg_id'])
         return cluster
     
-    def compute_all_metabolite_clusters(self, escher_graph):
+    def compute_all_metabolite_clusters(self, escher_graph, node_type = 'metabolite'):
         g = nx.Graph()
         for node_id in escher_graph['nodes']:
             node = escher_graph['nodes'][node_id]
-            if not node_id in g.nodes and node['node_type'] == 'metabolite':
+            if not node_id in g.nodes and node['node_type'] == node_type:
                 node = escher_graph['nodes'][node_id]
                 coords_1 = (node['x'], node['y'])
-                cluster = self.get_cluster(escher_graph, coords_1, self.max_distance, 'metabolite')
+                cluster = self.get_cluster(escher_graph, coords_1, self.max_distance, node_type)
                 cluster = list(cluster)
                 if len(cluster) > 1:
                     prev = cluster[0]
