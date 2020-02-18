@@ -3,12 +3,21 @@ import math
 import copy
 import escher
 
+
 class EscherMap:
     
     def __init__(self, escher_map):
         self.escher_map = escher_map
         self.escher_graph = escher_map[1]
         self.escher_data = escher_map[0]
+        
+        #assume missing b1 and b2 are None
+        for rxn_uid, rxn in self.escher_graph['reactions'].items():
+            for seg_uid, seg in rxn['segments'].items():
+                if not 'b1' in seg:
+                    seg['b1'] = None
+                if not 'b2' in seg:
+                    seg['b2'] = None
         
     def get_next_id(self):
         next_id = 0
@@ -680,6 +689,7 @@ class EscherMap:
             tlabel['x'] -= offset_x
             tlabel['y'] -= offset_y
     
+    @staticmethod
     def from_json(filename):
         escher_map = None
         with open(filename, 'r') as f:
