@@ -152,6 +152,21 @@ def get_stoichiometry(rnode):
         
     return stoichiometry
 
+def detect_current_compartment(n):
+    if 'compartment' in n:
+        return n['compartment']
+    id = n['bigg_id']
+    if '_' in id:
+        p = id.split('_')
+        base = '_'.join(p[:-1])
+        return base, p[-1]
+    return None, None
+
+def detect_compartment_index(cmp):
+    if cmp == None or len(cmp) == 1:
+        return None
+    return cmp[1:]
+
 def add_compartment(em, node_uid_cmp):
     for node_uid in node_uid_cmp:
         if node_uid in em.escher_graph['nodes']:
@@ -177,6 +192,47 @@ def move_to_compartment(cmp_id, em):
             o['bigg_id'] = node_uid_id[o['node_uid']]
             
         rnode['bigg_id'] += '_' + cmp_id
+    return node_uid_cmp
+
+def move_to_compartment2(cmp_id, em, cmp_index):
+    em.add_uid_to_reaction_metabolites()
+    node_uid_cmp = {}
+    node_uid_id = {}
+    for node_uid in em.escher_graph['nodes']:
+        n = em.escher_graph['nodes'][node_uid]
+        if n['node_type'] == 'metabolite':
+            target_cmp = cmp_id
+            base, node_cmp = detect_current_compartment(n)
+            if not node_cmp == None:
+                node_cmp_index = detect_compartment_index(node_cmp)
+                if node_cmp_index == None:
+                    node_cmp += str(cmp_index)
+                target_cmp = node_cmp
+            #print(n['bigg_id'], target_cmp)
+            if not 'compartment' in n:
+                node_uid_cmp[node_uid] = target_cmp
+                if not base == None:
+                    n['bigg_id'] = base + '_' + target_cmp
+                else:
+                    n['bigg_id'] += '_' + target_cmp
+                node_uid_id[node_uid] = n['bigg_id']
+    add_compartment(em, node_uid_cmp)
+    for rxn_uid in em.escher_graph['reactions']:
+        rnode = em.escher_graph['reactions'][rxn_uid]
+        target_cmp = cmp_id
+        base, node_cmp = detect_current_compartment(rnode)
+        if not node_cmp == None:
+            node_cmp_index = detect_compartment_index(node_cmp)
+            if node_cmp_index == None:
+                node_cmp += str(cmp_index)
+            target_cmp = node_cmp
+        for o in rnode['metabolites']:
+            o['bigg_id'] = node_uid_id[o['node_uid']]
+         
+        if not base == None:
+            rnode['bigg_id'] = base + '_' + target_cmp
+        else:
+            rnode['bigg_id'] += '_' + target_cmp
     return node_uid_cmp
 
 def get_cstoich_list(em, rnode):
