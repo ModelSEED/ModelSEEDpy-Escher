@@ -58,7 +58,7 @@ class RefitMap:
 
     def refit_map_reaction(self, o, nodes, cmp_config):
         cmp_token = cmp_config['0']
-        print('refit_map_reaction', o['bigg_id'], cmp_config, cmp_token, len(cmp_token))
+        # print('refit_map_reaction', o['bigg_id'], cmp_config, cmp_token, len(cmp_token))
         if len(cmp_token) > 0:
             for s_uid in o['segments']:
                 segment = o['segments'][s_uid]
