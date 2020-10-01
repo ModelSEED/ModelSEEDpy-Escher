@@ -153,9 +153,9 @@ def get_stoichiometry(rnode):
     return stoichiometry
 
 def detect_current_compartment(n):
-    if 'compartment' in n:
-        return n['compartment']
     id = n['bigg_id']
+    if 'compartment' in n:
+        return id, n['compartment']
     if '_' in id:
         p = id.split('_')
         base = '_'.join(p[:-1])
