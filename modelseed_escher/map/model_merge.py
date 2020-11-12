@@ -108,6 +108,9 @@ class RefitMap:
                     o['annotation'] = {}
                 if 'seed.reaction' not in o['annotation']:
                     o['annotation']['seed.reaction'] = []
-                o['annotation']['seed.reaction'].append(rxn.id)
+                if type(o['annotation']['seed.reaction']) == str:
+                    o['annotation']['seed.reaction'] = [o['annotation']['seed.reaction']]
+                if rxn.id not in o['annotation']['seed.reaction']:
+                    o['annotation']['seed.reaction'].append(rxn.id)
                 o['annotation']['seed.compartment'] = ';'.join(map(lambda x: x[0] + ':' + x[1], cmp_config.items()))
         return em

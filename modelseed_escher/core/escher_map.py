@@ -26,6 +26,23 @@ class EscherMap:
                 next_id = int(node_id) + 1
 
         return next_id
+
+    def get_next_segment_id(self):
+        next_id = 0
+        for rxn_uid in self.escher_graph['reactions']:
+            for node_id in self.escher_graph['reactions'][rxn_uid]['segments']:
+                if int(node_id) >= next_id:
+                    next_id = int(node_id) + 1
+
+        return next_id
+
+    def get_next_reaction_id(self):
+        next_id = 0
+        for node_id in self.escher_graph['reactions']:
+            if int(node_id) >= next_id:
+                next_id = int(node_id) + 1
+
+        return next_id
         
     def swap_ids(self, cpd_remap, rxn_remap):
         for map_uid in self.escher_graph['nodes']:
