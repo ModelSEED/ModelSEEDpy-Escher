@@ -671,9 +671,9 @@ class EscherMap:
             cc_coords[c] = {'x': 0, 'y': 0}
         self.add_reaction(stoich, x, y, 3 * math.pi / 2, 500, 't1', 't2', layout, 0, cc_coords, cc, None, None)
     
-    def display_in_notebook(self, enable_editing = False):
-        builder = escher.Builder(map_json=json.dumps(self.escher_map))
-        return builder.display_in_notebook(enable_editing = enable_editing)
+    def display_in_notebook(self, enable_editing=False, reaction_data=None):
+        builder = escher.Builder(map_json=json.dumps(self.escher_map), reaction_data=reaction_data)
+        return builder.display_in_notebook(enable_editing=enable_editing)
     
     def set_to_origin(self):
         offset_x = self.escher_graph['canvas']['x']

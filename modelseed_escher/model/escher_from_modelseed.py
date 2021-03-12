@@ -121,7 +121,7 @@ def modelseed_to_cobra_compound(cpd, cmp='z'):
     ccpd['name'] = cpd.data['name']
     if cmp is not None and len(cmp) > 0:
         ccpd['name'] += " [{}]".format(cmp)
-    ccpd['formula'] = ''# if cpd.data['formula'] cpd.data['formula']
+    ccpd['formula'] = '' if cpd.data['formula'] is None or not type(cpd.data['formula']) == str else cpd.data['formula']
     ccpd['charge'] = cpd.data['charge']
     ccpd['compartment'] = cmp
     ccpd['annotation'] = {'seed.reaction': cpd.id}
