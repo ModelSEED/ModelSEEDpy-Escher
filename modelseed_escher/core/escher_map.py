@@ -1,23 +1,36 @@
+import logging
 import json
 import math
 import copy
 import escher
 
+logger = logging.getLogger(__name__)
+
 
 class EscherMap:
     
-    def __init__(self, escher_map):
-        self.escher_map = escher_map
-        self.escher_graph = escher_map[1]
-        self.escher_data = escher_map[0]
+    def __init__(self, escher_data):
+        self.escher_data = escher_data
+        self.escher_graph = escher_data[1]
+        self.escher_meta = escher_data[0]
         
-        #assume missing b1 and b2 are None
+        # assume missing b1 and b2 are None
         for rxn_uid, rxn in self.escher_graph['reactions'].items():
             for seg_uid, seg in rxn['segments'].items():
-                if not 'b1' in seg:
+                if 'b1' not in seg:
                     seg['b1'] = None
-                if not 'b2' in seg:
+                if 'b2' not in seg:
                     seg['b2'] = None
+
+    @staticmethod
+    def from_json(filename):
+        with open(filename, 'r') as f:
+            escher_map = EscherMap(json.loads(f.read()))
+            return escher_map
+
+    @staticmethod
+    def from_dict(d):
+        pass
         
     def get_next_id(self):
         next_id = 0
@@ -148,30 +161,32 @@ class EscherMap:
     
     @property
     def nodes(self):
-        return self.escher_graph['nodes']
+        for node_uid in self.escher_graph['nodes']:
+            node = self.escher_graph['nodes'][node_uid]
+            node['uid'] = node_uid
+            yield node
     
-    #@property
-    #def reactions(self):
-    #    return self.escher_graph['reactions']
+    @property
+    def labels(self):
+        for uid in self.escher_graph['text_labels']:
+            text_label = self.escher_graph['text_labels'][uid]
+            text_label['uid'] = uid
+            yield text_label
     
     @property
     def reactions(self):
-        reactions = list(
-            self.escher_graph['reactions'].values()
-        )
-
-        return reactions
+        for reaction_uid in self.escher_graph['reactions']:
+            reaction = self.escher_graph['reactions'][reaction_uid]
+            reaction['uid'] = reaction_uid
+            yield reaction
     
     @property
     def metabolites(self):
-        metabolites = list(
-            filter(
-                lambda o : o['node_type'] == 'metabolite', 
-                self.escher_graph['nodes'].values()
-            )
-        )
-
-        return metabolites
+        for node_uid in self.escher_graph['nodes']:
+            node = self.escher_graph['nodes'][node_uid]
+            if node['node_type'] == 'metabolite':
+                node['uid'] = node_uid
+                yield node
     
     def generate_coords(self, func, n, x1, x2, x, y, orient, prod):
         a = x
@@ -672,7 +687,7 @@ class EscherMap:
         self.add_reaction(stoich, x, y, 3 * math.pi / 2, 500, 't1', 't2', layout, 0, cc_coords, cc, None, None)
     
     def display_in_notebook(self, enable_editing=False, reaction_data=None):
-        builder = escher.Builder(map_json=json.dumps(self.escher_map), reaction_data=reaction_data)
+        builder = escher.Builder(map_json=json.dumps(self.escher_data), reaction_data=reaction_data)
         return builder.display_in_notebook(enable_editing=enable_editing)
     
     def set_to_origin(self):
@@ -681,20 +696,18 @@ class EscherMap:
         self.escher_graph['canvas']['x'] = 0
         self.escher_graph['canvas']['y'] = 0
 
-        for uid in self.nodes:
-            n = self.nodes[uid]
+        for n in self.nodes:
             n['x'] -= offset_x
             n['y'] -= offset_y
             if 'label_x' in n:
                 n['label_x'] -= offset_x
             if 'label_y' in n:
                 n['label_y'] -= offset_y
-        for uid in self.escher_graph['reactions']:
-            rnode = self.escher_graph['reactions'][uid]
-            rnode['label_x'] -= offset_x
-            rnode['label_y'] -= offset_y
-            for s_uid in rnode['segments']:
-                segment = rnode['segments'][s_uid]
+        for reaction_node in self.escher_graph['reactions']:
+            reaction_node['label_x'] -= offset_x
+            reaction_node['label_y'] -= offset_y
+            for s_uid in reaction_node['segments']:
+                segment = reaction_node['segments'][s_uid]
                 if 'b1' in segment and segment['b1']:
                     segment['b1']['x'] -= offset_x
                     segment['b1']['y'] -= offset_y
@@ -705,14 +718,63 @@ class EscherMap:
             tlabel = self.escher_graph['text_labels'][uid]
             tlabel['x'] -= offset_x
             tlabel['y'] -= offset_y
-    
-    @staticmethod
-    def from_json(filename):
-        escher_map = None
-        with open(filename, 'r') as f:
-            escher_map = EscherMap(json.loads(f.read()))
-        return escher_map
+
+    def _refactor_escher_data(self):
+        """
+        refactor escher data to better fit KBaseFBA.EscherMap object
+        """
+        logging.info('start refactoring escher data')
+        refactored_escher_data = copy.deepcopy(self.escher_data)
+
+        refactored_escher_data[0]['map_name'] = "custom map"
+        if 'authors' not in refactored_escher_data[0]:
+            refactored_escher_data[0]['authors'] = []
+
+        for rxn_uid in refactored_escher_data[1]['reactions']:
+            rxn_node = refactored_escher_data[1]['reactions'][rxn_uid]
+            rxn_node['reversibility'] = 1 if rxn_node['reversibility'] else 0
+
+            for seg_uid in rxn_node['segments']:
+                seg = rxn_node['segments'][seg_uid]
+                if seg['b1'] is None:
+                    del seg['b1']
+                if seg['b2'] is None:
+                    del seg['b2']
+
+        for node_uid in refactored_escher_data[1]['nodes']:
+            node = refactored_escher_data[1]['nodes'][node_uid]
+            if 'node_is_primary' in node:
+                node['node_is_primary'] = 1 if node['node_is_primary'] else 0
+
+        refactored_escher_data = {
+            "metadata": refactored_escher_data[0],
+            "layout": refactored_escher_data[1]
+        }
+
+        if refactored_escher_data == self.escher_data:
+            logging.warning('No changes in escher data')
+
+        return refactored_escher_data
+
+    def get_metadata(self):
+        reactions = sorted(list(map(lambda x: x['bigg_id'], self.reactions)))
+        #compounds = sorted(list(map(lambda x: x['bigg_id'], self.metabolites)))
+        return {
+            #"type": '',
+            "reactions": '|'.join(reactions),
+            #"compounds": '|'.join(compounds),
+            "name": self.escher_meta['map_name']
+            #"description": self.escher_meta['map_description']
+        }
+
+    def get_data(self):
+        return self._refactor_escher_data()
       
     def clone(self):
-        data = copy.deepcopy(self.escher_map)
-        return EscherMap(data)
+        return EscherMap(copy.deepcopy(self.escher_data))
+
+    def __repr__(self):
+        return "<%s %s at 0x%x>" % (self.__class__.__name__, self.escher_meta['map_name'], id(self))
+
+#    def _repr_html_(self):
+#        return self.display_in_notebook()
