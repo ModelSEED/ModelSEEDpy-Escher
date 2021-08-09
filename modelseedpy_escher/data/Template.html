@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<!-- formatting for escher map -->
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+	<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/simplex/bootstrap.min.css"/>   -->
+
+	<link rel="stylesheet" href="https://unpkg.com/escher-vis@1.6.0/css/dist/builder.min.css"/>  <!-- removes the tabs if active -->
+
+	<link rel="shortcut icon" href="https://escher.github.io/escher/static/img/favicon.ico" />
+
+	<meta charset="utf-8"/>
+
+	<!-- formatting for table -->
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">  <!-- does nto appear to do anyhting -->
+	<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js">
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+	</script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous">
+	</script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js">
+	</script>
+	<script> type="text/javascript" language="javascript" src=https://unpkg.com/escher/dist/escher.js
+	</script>
+
+
+    <style>
+        table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+        }
+        th, td {
+          padding: 5px;
+        }
+        th {
+          text-align: center;
+        }
+    </style>
+</head>
+<!-- create tabs -->
+<body class="container">
+	<div>
+		<ul class="nav nav-tabs" id="nav-tab" role="tablist">
+					<li><a class="nav-item nav-link active" id="nav-table-tab" data-toggle="tab" href="#nav-table" role="tab" aria-controls="nav-table" aria-selected="true">Table</a> </li>
+					<li><a class="nav-item nav-link" id="nav-map-tab" data-toggle="tab" href="#nav-map" role="tab" aria-controls="nav-map" aria-selected="false">Map</a> </li>
+		</ul>
+		<!-- create table tab -->
+		<div class="tab-content" id="nav-tabContent">
+					<div class="tab-pane fade show active" id="nav-table" role="tabpanel" aria-labelledby="nav-summary-tab">
+						<input type="text" id="mname" name="mname">
+
+						<button onclick="openMap()">Open Map</button>
+
+						<table id="table-reactions" class="table table-striped table-bordered" style="width:100%"></table>
+					</div>
+					<!-- table tab -->
+					<div class="tab-pane fade" id="nav-map" role="tabpanel" aria-labelledby="nav-map-tab" height:43px >
+
+						<div style="height: 100%; width: 100%;" id="map_container"></div>
+					</div>
+		</div>
+
+	</div>
+
+<script>	// script to change the map data
+function openMap() {
+	var map_name = document.getElementById("mname").value //  fine
+	map_name = map_name.replaceAll(' ', '%20')
+	$.getJSON('https://raw.githubusercontent.com/nitkiew2/Escher-Map-Visualization/main/map_json_data/'+ map_name +'.json', function(maps_dictionary) {
+	    // JSON result in `maps_dictionary` variable
+
+			//called a future, do this after the callback
+			//console.log(maps_dictionary)
+			var options = {"menu": "all",
+			"enable_keys": true,
+			"enable_editing": true,
+			"scroll_behavior": "pan",
+			"fill_screen": false,
+			"ignore_bootstrap": false,
+			"never_ask_before_quit": false,
+			 "reaction_data": null,
+			  "metabolite_data": null,
+				"gene_data": null}
+
+			escher.Builder(maps_dictionary, null, null,
+										 escher.libs.d3_select('#map_container'), options);
+	});
+	//var new_map_data = '{{new_map_data_json_b64|safe}}'  //  fine
+	//new_map_data = new_map_data.replaceAll('\n', '\\n')  //  fine
+	//data.map_data = JSON.parse(new_map_data)
+	//document.getElementById("mname").value = ''         //  fine
+	//document.getElementById("mname").value = ''
+
+
+}
+</script>
+
+
+<script>  // copied script to load initial map
+ /* Closure to make sure data only applies to this map. */
+ var load_map = function() {
+		 /* data from python */
+		 var data = get_data();
+
+		 function load_lib(url, callback) {
+				 /** Dynamically load a JavaScript file */
+				 var s = document.createElement('script');
+				 s.src = url;
+				 s.async = true;
+				 s.onreadystatechange = s.onload = callback;
+				 s.onerror = function() {
+						 console.warn('Failed to load library ' + url);
+				 };
+				 document.getElementsByTagName('head')[0].appendChild(s);
+		 }
+
+		 function check_global_and_load(name, url, callback) {
+				 /** Look for the name in the global scope. If it isn't present, then
+						load the library at url. Returns the object. */
+				 if (window[name] !== undefined) {
+						 callback(window[name]);
+				 } else {
+						 load_lib(url, function() {
+								 callback(window[name]);
+						 });
+				 }
+		 }
+
+		 function draw_escher(escher) {
+				 /** Get data and draw */
+				 var load = function(t_map_data, t_model_data, t_options) {
+						 escher.Builder(t_map_data, t_model_data, data.builder_embed_css,
+														escher.libs.d3_select('#' + data.id), t_options);
+				 }
+
+				 // for the static site, use the url attributes for the map and model
+				 // information
+				 if (data.static_site_index !== null) {
+						 escher.static.load_map_model_from_url(data.map_download_url, data.model_download_url,
+																									 data.static_site_index, data.options, load);
+				 } else {
+						 load(data.map_data, data.model_data, data.options);
+				 }
+		 }
+
+		 // Load dependencies and draw
+		 if (typeof define === 'function' && define.amd) {
+				 // require.js is available: use it to load escher
+				 require.config({
+					 paths: {
+						 escher: 'https://unpkg.com/escher-vis@1.6.0/js/dist/escher.min',
+					 },
+					 // Override urlArgs that adds ?v= to the end of the escher URL and
+					 // messes up unpkg links. Honestly, I'm not sure if this will lead
+					 // to downstream bugs in the notebook, but they really shouldn't be
+					 // doing this cache-busting anyway.
+					 urlArgs: null,
+				 })
+				 require([ 'escher' ], function(escher) {
+						 draw_escher(escher);
+				 })
+		 } else {
+				 // require.js not available: dynamically load escher
+				 check_global_and_load('escher', 'https://unpkg.com/escher-vis@1.6.0/js/dist/escher.min.js', function(escher) {
+						 draw_escher(escher);
+				 })
+		 }
+
+		 // Put this at the end so Chrome doesn't cut off the code above.
+		 function get_data() {
+				 /** Return the data passed in by the Python module. */
+				 var m_data = '{{map_data_json_b64|safe}}'
+				 m_data = m_data.replaceAll('\n', '\\n')
+				 return {
+						 id: JSON.parse('"map_container"'),
+						 map_download_url: JSON.parse('"https://escher.github.io/1-0-0/5/maps/"'),
+						 model_download_url: JSON.parse('"https://escher.github.io/1-0-0/5/models/"'),
+						 options: JSON.parse('{"menu": "all", "enable_keys": true, "enable_editing": true, "scroll_behavior": "pan", "fill_screen": false, "ignore_bootstrap": false, "never_ask_before_quit": false, "reaction_data": null, "metabolite_data": null, "gene_data": null}'),
+						 builder_embed_css: JSON.parse('null'),
+						 map_data: JSON.parse(m_data),
+						 model_data: JSON.parse('null'),
+						 static_site_index: JSON.parse('null'),
+				 };
+		 }
+ };
+</script>
+
+<script>     // script to generate table
+//document.ready, starts reading top to bottom,
+//make sure we have all content ready, then javasctipt
+$(document).ready(function() {
+    "use strict";
+    var reactions = {
+        data: {{ inp_data|safe }},
+        cols: {
+            map_name: {
+                title: "Map Name",
+                data:    d => d.id,
+            },
+            reactions: {
+                title: "% of model reactions in map",
+                data:   d => d.reactions,
+            },
+            genes: {
+                title: "Unique Gene Count",
+                data:   d => d.genes,
+            },
+        },
+        colOrder: [
+            'map_name',
+            'reactions',
+            'genes'
+        ],
+    }
+
+
+    $('#table-reactions').DataTable( {
+        data: Object.values( reactions.data ),
+        columns: reactions.colOrder.map( e => reactions.cols[ e ] ),
+    } );
+
+		load_map();
+
+} );
+</script>
+
+</body>
+</html>
