@@ -691,6 +691,10 @@ class EscherMap:
         return builder.display_in_notebook(enable_editing=enable_editing)
     
     def set_to_origin(self):
+        """
+        Update coordinates to (0, 0) as origin
+        :return:
+        """
         offset_x = self.escher_graph['canvas']['x']
         offset_y = self.escher_graph['canvas']['y']
         self.escher_graph['canvas']['x'] = 0
@@ -703,7 +707,7 @@ class EscherMap:
                 n['label_x'] -= offset_x
             if 'label_y' in n:
                 n['label_y'] -= offset_y
-        for reaction_node in self.escher_graph['reactions']:
+        for reaction_node in self.reactions:
             reaction_node['label_x'] -= offset_x
             reaction_node['label_y'] -= offset_y
             for s_uid in reaction_node['segments']:
@@ -715,9 +719,9 @@ class EscherMap:
                     segment['b2']['x'] -= offset_x
                     segment['b2']['y'] -= offset_y
         for uid in self.escher_graph['text_labels']:
-            tlabel = self.escher_graph['text_labels'][uid]
-            tlabel['x'] -= offset_x
-            tlabel['y'] -= offset_y
+            t_label = self.escher_graph['text_labels'][uid]
+            t_label['x'] -= offset_x
+            t_label['y'] -= offset_y
 
     def _refactor_escher_data(self):
         """

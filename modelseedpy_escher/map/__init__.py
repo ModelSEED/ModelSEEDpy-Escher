@@ -1,1 +1,1 @@
-from modelseed_escher.map.escher_cluster import EscherCluster
+from modelseedpy_escher.map.escher_cluster import EscherCluster

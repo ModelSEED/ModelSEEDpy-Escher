@@ -3,6 +3,7 @@ import copy
 
 logger = logging.getLogger(__name__)
 
+
 class EscherGrid:
     
     def __init__(self):
@@ -176,18 +177,19 @@ class EscherGrid:
                         to_draw.set_to_origin()
                         logger.debug("[DRAW] %d next_id: %d", map_index, next_id)
 
-                        next_id, node_id_remap, compound_remap = self.copy_map_compounds(to_draw.escher_map,
-                                           master.escher_map, 
-                                           next_id, 
-                                           lambda n : (n['bigg_id'], n['name']), 
-                                           x_off = j * block_width, y_off = i * block_height)
+                        next_id, node_id_remap, compound_remap = self.copy_map_compounds(to_draw.escher_data,
+                                                                                         master.escher_data,
+                                                                                         next_id,
+                                                                                         lambda n: (n['bigg_id'], n['name']),
+                                                                                         x_off=j * block_width,
+                                                                                         y_off=i * block_height)
 
-                        next_id = self.copy_map_reactions(to_draw.escher_map, 
-                                                     master.escher_map, 
-                                                     next_id, 
-                                                     node_id_remap, compound_remap, 
-                                                     lambda n : (n['bigg_id'], n['name']), 
-                                                     x_off = j * block_width, y_off = i * block_height)
+                        next_id = self.copy_map_reactions(to_draw.escher_data,
+                                                          master.escher_data,
+                                                          next_id,
+                                                          node_id_remap, compound_remap,
+                                                          lambda n: (n['bigg_id'], n['name']),
+                                                          x_off=j * block_width, y_off=i * block_height)
                     map_index += 1
 
         return master

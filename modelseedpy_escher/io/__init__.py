@@ -1,1 +1,1 @@
-from modelseed_escher.io.json import load_json_map
+from modelseedpy_escher.io.json import load_json_map

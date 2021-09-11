@@ -3,8 +3,8 @@ import json
 import cobra
 import escher
 import cobrakbase
-from modelseed_escher.core import CobraJsonModel
-from modelseed_escher.core import EscherMap
+from modelseedpy_escher.core import CobraJsonModel
+from modelseedpy_escher.core import EscherMap
 
 logger = logging.getLogger(__name__)
 

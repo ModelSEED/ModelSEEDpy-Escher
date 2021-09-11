@@ -1,5 +1,5 @@
 import json
-from modelseed_escher.core import EscherMap
+from modelseedpy_escher.core import EscherMap
 
 
 def load_json_map(filename):

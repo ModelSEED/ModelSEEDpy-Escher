@@ -1,11 +1,8 @@
-import modelseed_escher.core
-import modelseed_escher.map
-#import modelseed_escher.kbase
-#import modelseed_escher.modelseed
-from modelseed_escher.escher_manager import EscherManager
-from modelseed_escher.escher_map_grid import EscherGrid
-#from escher_manager import EscherManager
+import modelseedpy_escher.core
+import modelseedpy_escher.map
+from modelseedpy_escher.escher_manager import EscherManager
+from modelseedpy_escher.escher_map_grid import EscherGrid
 
-__author__  = "Filipe Liu"
-__email__   = "fliu@anl.gov"
-__version__ = "0.1.0"
+__author__ = "Filipe Liu"
+__email__ = "fliu@anl.gov"
+__version__ = "0.2.0"

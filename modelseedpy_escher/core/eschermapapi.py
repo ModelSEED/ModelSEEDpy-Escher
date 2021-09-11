@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import json
 import re
 import escher
-from modelseed_escher.core import EscherMap
+from modelseedpy_escher.core import EscherMap
 
 logger = logging.getLogger(__name__)
 

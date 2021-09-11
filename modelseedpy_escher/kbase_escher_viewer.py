@@ -1,5 +1,5 @@
 import cobrakbase
-from modelseed_escher import EscherModel, EscherMap
+from modelseedpy_escher import EscherModel, EscherMap
 
 class KBaseEscherViewer():
     

@@ -1,7 +1,7 @@
-from modelseed_escher.core.escher_map import EscherMap
+from modelseedpy_escher.core.escher_map import EscherMap
 import json
 
-class EscherManager():
+class EscherManager:
     
     def __init__(self, escher_instance):
         self.escher = escher_instance
