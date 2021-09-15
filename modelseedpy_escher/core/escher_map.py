@@ -69,16 +69,19 @@ class EscherMap:
             for m in map_reaction['metabolites']:
                 if m['bigg_id'] in cpd_remap:
                     m['bigg_id'] = cpd_remap[m['bigg_id']]
-    
-    def add_uid_to_reaction_metabolites(self):
+
+    def get_metabolite_uid_map(self):
         node_uid_map = {}
-        for node_uid in self.escher_graph['nodes']:
-            node = self.escher_graph['nodes'][node_uid]
-            if node['node_type'] == 'metabolite':
-                bigg_id = node['bigg_id']
-                if not bigg_id in node_uid_map:
-                    node_uid_map[bigg_id] = set()
-                node_uid_map[bigg_id].add(node_uid)
+        for node in self.metabolites:
+            node_uid = node['uid']
+            bigg_id = node['bigg_id']
+            if bigg_id not in node_uid_map:
+                node_uid_map[bigg_id] = set()
+            node_uid_map[bigg_id].add(node_uid)
+        return node_uid_map
+
+    def add_uid_to_reaction_metabolites(self):
+        node_uid_map = self.get_metabolite_uid_map()
 
         for node_uid in self.escher_graph['reactions']:
             rnode = self.escher_graph['reactions'][node_uid]
