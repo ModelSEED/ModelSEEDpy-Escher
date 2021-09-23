@@ -10,8 +10,9 @@ class EscherCluster:
     @staticmethod
     def distance(P, Q):
         return math.sqrt(math.pow(Q[0]-P[0], 2) + math.pow(Q[1]-P[1], 2))
-    
-    def get_cluster(self, escher_graph, coords_1, max_distance, type_match):
+
+    @staticmethod
+    def get_cluster(escher_graph, coords_1, max_distance, type_match):
         cluster = set()
         for node_id in escher_graph['nodes']:
             node = escher_graph['nodes'][node_id]

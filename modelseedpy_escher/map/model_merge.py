@@ -1,11 +1,15 @@
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 def is_reversible(model_rxn):
     return model_rxn.lower_bound < 0 and model_rxn.upper_bound > 0
 
+
 def reverse_stoichimetry(s):
     return dict(map(lambda x : (x[0], x[1] * -1), s.items()))
+
 
 def validate_map_with_model(escher_model_map, model):
     model_spi_ids = set(map(lambda x: x.id, model.metabolites))
