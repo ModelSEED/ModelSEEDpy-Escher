@@ -4,7 +4,7 @@ import math
 
 class EscherCluster:
     
-    def __init__(self, max_distance = 50):
+    def __init__(self, max_distance=50):
         self.max_distance = max_distance
     
     @staticmethod

@@ -85,9 +85,7 @@ class RefitMap:
     def refit(self, em, cmp_config):
         em = em.clone()
         self.updated_node = set()
-        nodes = {}
-        for node_id in em.nodes:
-            nodes[node_id] = em.nodes[node_id]
+        nodes = dict(map(lambda x: (x['uid'], x), em.nodes))
         seed_ids = {}
         for o in em.reactions:
             seed_id = o['bigg_id']
