@@ -93,9 +93,9 @@ class EscherMerge:
                 placed |= {index_from, index_to}
                 uid_from = self.uid_mapping[index_from]
                 uid_to = self.uid_mapping[index_to]
-                segments[self.em_uid] = {
-                    'from_node_id': uid_from,
-                    'to_node_id': uid_to,
+                segments[str(self.em_uid)] = {
+                    'from_node_id': str(uid_from),
+                    'to_node_id': str(uid_to),
                     'b1': seg['b1'],
                     'b2': seg['b2']
                 }
@@ -112,7 +112,7 @@ class EscherMerge:
             segments = self.compute_segments(map_index, reaction, visited, placed)
             if len(segments) > 0:
                 r['segments'] = segments
-                reactions[self.em_uid] = r
+                reactions[str(self.em_uid)] = r
                 self.em_uid += 1
         return reactions
 
