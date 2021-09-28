@@ -19,3 +19,13 @@ def to_json(em):
     Wrapper for later
     """
     return em.escher_data
+
+
+def from_json(d):
+    """
+    Load a escher map from a JSON document.
+
+    :param d:
+    :return:
+    """
+    return EscherMap(d)
